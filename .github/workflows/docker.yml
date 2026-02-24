@@ -26,6 +26,12 @@ jobs:
       - name: Build Frontend Image
         run: |
           docker build -t yashikesarwani/mean-frontend:latest ./frontend
+      
+      - name: Build Angular App
+        run: |
+          cd frontend
+          npm install
+          npm run build -- --configuration production
 
       - name: Build Nginx Image
         run: |
