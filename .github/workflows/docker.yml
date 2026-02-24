@@ -56,5 +56,5 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/azureuser/mean-app
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d
