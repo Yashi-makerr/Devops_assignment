@@ -20,22 +20,19 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Backend Image
-        run: |
-          docker build -t yashikesarwani/mean-backend:latest ./backend
+        run: docker build -t yashikesarwani/mean-backend:latest ./backend
 
-      - name: Build Frontend Image
-        run: |
-          docker build -t yashikesarwani/mean-frontend:latest ./frontend
-      
       - name: Build Angular App
         run: |
           cd frontend
           npm install
           npm run build -- --configuration production
 
+      - name: Build Frontend Image
+        run: docker build -t yashikesarwani/mean-frontend:latest ./frontend
+
       - name: Build Nginx Image
-        run: |
-          docker build -t yashikesarwani/mean-nginx:latest -f nginx.Dockerfile .
+        run: docker build -t yashikesarwani/mean-nginx:latest -f nginx.Dockerfile .
 
       - name: Push Backend Image
         run: docker push yashikesarwani/mean-backend:latest
@@ -45,3 +42,19 @@ jobs:
 
       - name: Push Nginx Image
         run: docker push yashikesarwani/mean-nginx:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/azureuser/mean-app
+            docker-compose pull
+            docker-compose up -d
