@@ -1,27 +1,116 @@
-In this DevOps task, you need to build and deploy a full-stack CRUD application using the MEAN stack (MongoDB, Express, Angular 15, and Node.js). The backend will be developed with Node.js and Express to provide REST APIs, connecting to a MongoDB database. The frontend will be an Angular application utilizing HTTPClient for communication.  
+#Set up and the deployment instruction
+first part
+#Development Phase (Local Setup)
+Structure:
+backend/        → Node + Express API
+frontend/       → Angular app
+nginx.conf      → Reverse proxy config
+nginx.Dockerfile
+docker-compose.yml
 
-The application will manage a collection of tutorials, where each tutorial includes an ID, title, description, and published status. Users will be able to create, retrieve, update, and delete tutorials. Additionally, a search box will allow users to find tutorials by title.
+Local Flow:
 
-## Project setup
+Backend connects to MongoDB
+Angular frontend calls backend APIs
+Nginx serves Angular build
+Docker Compose runs:
+Mongo container
+Backend container
+Nginx container
 
-### Node.js Server
+Request Flow (Locally & Production Same)
+User Browser
+     ↓
+Port 80
+     ↓
+Nginx Container
+     ↓
+Backend Container (Express)
+     ↓
+MongoDB Container
 
-cd backend
+second part
+#Containerization Structure
+Backend Dockerfile
 
-npm install
+Uses Node image
+Installs dependencies
+Exposes backend port
 
-You can update the MongoDB credentials by modifying the `db.config.js` file located in `app/config/`.
+Angular Build Step
 
-Run `node server.js`
+npm run build --configuration production
+Generates optimized dist/ folder
 
-### Angular Client
+Nginx Dockerfile
 
-cd frontend
+Uses nginx:alpine
+Copies Angular dist to /usr/share/nginx/html
+Copies nginx.conf
+Handles reverse proxy to backend
 
-npm install
+Third Part
+#Docker Compose (Production Version on Azure)
+We pull Pulls images,runs containers,so actually we does not need source code
 
-Run `ng serve --port 8081`
+fourth part
+#CI/CD Pipeline Flow
+CI Phase
 
-You can modify the `src/app/services/tutorial.service.ts` file to adjust how the frontend interacts with the backend.
+GitHub Actions:
+Checkout repository
+Login to Docker Hub
+Build backend image
+Build Angular app
+Build nginx image
+Push images to Docker Hub
 
-Navigate to `http://localhost:8081/`
+CD phase
+SSH into Azure VM
+Run:
+docker compose pull
+docker compose up -d
+VM pulls latest images
+Containers restart automatically
+Fully automated deployment.
+No manual login required.
+
+final part 
+#Final Production Architecture
+GitHub Repo
+     ↓ push
+GitHub Actions
+     ↓
+Docker Hub
+     ↓
+Azure VM
+     ↓
+Docker Compose
+     ↓
+Nginx (Port 80)
+     ↓
+Backend API
+     ↓
+MongoDB
+
+Screenshots
+
+CI/CD Configuration-.github/workflows/docker.yml
+<img width="1419" height="977" alt="image" src="https://github.com/user-attachments/assets/49407412-6258-489a-89d7-eda883382978" />
+
+CI/CD Execution
+<img width="1908" height="967" alt="image" src="https://github.com/user-attachments/assets/91869f9e-6b42-43a6-88ed-644805b486a5" />
+
+Docker Hub Images Page
+<img width="1907" height="970" alt="image" src="https://github.com/user-attachments/assets/03f982d6-99e5-4ae0-8e66-9efc6e8f39a3" />
+
+Azure VM Running Containers
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6a936007-4cfb-41d2-ba07-0449fd1d8217" />
+
+Application Working on Browser
+<img width="1915" height="980" alt="image" src="https://github.com/user-attachments/assets/2fa07e32-4c2a-4518-8130-5a2cd98f9e20" />
+
+Nginx Reverse Proxy Proof
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/aa84a805-59cf-443c-a174-a570fce439f6" />
+
+
